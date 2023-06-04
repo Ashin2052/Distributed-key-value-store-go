@@ -14,17 +14,15 @@ Navigate to the project directory.
 ## To Test the application
 ```go test -v```
 
-##Usage
+## Usage
 The CLI supports the following commands:
 
-put <key> <value>: Stores the given key-value pair in the distributed key-value store.
-get <key>: Retrieves the value associated with the given key from the distributed key-value store.
-delete <key>: Deletes the key-value pair associated with the given key from the distributed key-value store.
+#### ```put <key> <value>```: Stores the given key-value pair in the distributed key-value store.
+#### ```get <key>```: Retrieves the value associated with the given key from the distributed key-value store.
+#### ```delete <key>```: Deletes the key-value pair associated with the given key from the distributed key-value store.
 To start the CLI, run the following command:
 
-shell
-Copy code
-go run main.go
+```go run main.go```
 After starting the CLI, you can enter commands:
 
 ```
