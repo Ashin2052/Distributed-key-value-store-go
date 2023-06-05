@@ -80,6 +80,7 @@ func (d *DistributedStore) delete(key string) {
 	node.deleteValue(key)
 }
 
+// replicate the last node data to every node
 func (d *DistributedStore) replicate() {
 	if len(d.nodes) < 2 {
 		return
