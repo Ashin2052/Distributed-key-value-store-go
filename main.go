@@ -96,6 +96,7 @@ func (d *DistributedStore) replicate() {
 func main() {
 	store := newDistributedStore()
 	store.addNode() // Add a node to the distributed store
+	store.addNode()
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -142,7 +143,7 @@ func main() {
 			fmt.Println("Key-value pair deleted.")
 		case "replicate":
 			store.replicate()
-			fmt.Println("last node replicated.")
+			fmt.Println("Node Replicated.")
 		default:
 			fmt.Println("Invalid command. Usage: <put|get|delete> <key> [<value>]")
 		}

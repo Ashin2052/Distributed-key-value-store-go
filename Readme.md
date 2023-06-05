@@ -39,7 +39,7 @@ Key-value pair deleted.
 Key not found.
 
 > replicate
-last node replicated.
+Node replicated.
 
 ```
 ## Implementation Details
