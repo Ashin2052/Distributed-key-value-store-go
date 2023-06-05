@@ -57,7 +57,9 @@ func (d *DistributedStore) addNode() {
 }
 
 // getNodeForKey returns the node responsible for a given key
+// If key = name and total nodes are 3 then len(4) % len(3) then nodeIndex to be inserted on  is 1
 func (d *DistributedStore) getNodeForKey(key string) *Node {
+
 	nodeIndex := len(key) % len(d.nodes)
 	return d.nodes[nodeIndex]
 }
