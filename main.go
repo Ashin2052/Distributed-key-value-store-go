@@ -6,11 +6,18 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 )
 
 // Node represents a single node in the distributed key-value store
 type Node struct {
 	data map[string]string
+}
+
+// DistributedStore represents a distributed key-value store consisting of multiple nodes
+type DistributedStore struct {
+	nodes []*Node
+	mutex sync.RWMutex
 }
 
 // NewNode creates a new Node instance
@@ -20,67 +27,75 @@ func NewNode() *Node {
 	}
 }
 
-// GetValue retrieves the value for a given key from the node
-func (n *Node) GetValue(key string) (string, bool) {
+// getValue retrieves the value for a given key from the node
+func (n *Node) getValue(key string) (string, bool) {
 	value, ok := n.data[key]
 	return value, ok
 }
 
-// SetValue sets a key-value pair in the node
-func (n *Node) SetValue(key, value string) {
+// setValue sets a key-value pair in the node
+func (n *Node) setValue(key, value string) {
 	n.data[key] = value
 }
 
-// DeleteValue deletes a key-value pair from the node
-func (n *Node) DeleteValue(key string) {
+// deleteValue deletes a key-value pair from the node
+func (n *Node) deleteValue(key string) {
 	delete(n.data, key)
 }
 
-// DistributedStore represents a distributed key-value store consisting of multiple nodes
-type DistributedStore struct {
-	nodes []*Node
-}
-
-// NewDistributedStore creates a new DistributedStore instance
-func NewDistributedStore() *DistributedStore {
+// newDistributedStore creates a new DistributedStore instance
+func newDistributedStore() *DistributedStore {
 	return &DistributedStore{
 		nodes: []*Node{},
 	}
 }
 
-// AddNode adds a new node to the distributed store
-func (d *DistributedStore) AddNode() {
+// addNode adds a new node to the distributed store
+func (d *DistributedStore) addNode() {
 	node := NewNode()
 	d.nodes = append(d.nodes, node)
 }
 
-// GetNodeForKey returns the node responsible for a given key
-func (d *DistributedStore) GetNodeForKey(key string) *Node {
+// getNodeForKey returns the node responsible for a given key
+func (d *DistributedStore) getNodeForKey(key string) *Node {
 	nodeIndex := len(key) % len(d.nodes)
 	return d.nodes[nodeIndex]
 }
 
-// Put stores a key-value pair in the distributed key-value store
-func (d *DistributedStore) Put(key, value string) {
-	node := d.GetNodeForKey(key)
-	node.SetValue(key, value)
+// put stores a key-value pair in the distributed key-value store
+func (d *DistributedStore) put(key, value string) {
+	node := d.getNodeForKey(key)
+	node.setValue(key, value)
 }
 
-// Get retrieves the value for a given key from the distributed key-value store
-func (d *DistributedStore) Get(key string) (string, bool) {
-	node := d.GetNodeForKey(key)
-	return node.GetValue(key)
+// get retrieves the value for a given key from the distributed key-value store
+func (d *DistributedStore) get(key string) (string, bool) {
+	node := d.getNodeForKey(key)
+	return node.getValue(key)
 }
 
-// Delete removes a key-value pair from the distributed key-value store
-func (d *DistributedStore) Delete(key string) {
-	node := d.GetNodeForKey(key)
-	node.DeleteValue(key)
+// delete removes a key-value pair from the distributed key-value store
+func (d *DistributedStore) delete(key string) {
+	node := d.getNodeForKey(key)
+	node.deleteValue(key)
+}
+
+func (d *DistributedStore) replicate() {
+	if len(d.nodes) < 2 {
+		return
+	}
+
+	lastNode := d.nodes[len(d.nodes)-1]
+	for key, value := range lastNode.data {
+		for _, node := range d.nodes[:len(d.nodes)-1] {
+			node.data[key] = value
+		}
+	}
 }
 
 func main() {
-	store := NewDistributedStore()
-	store.AddNode() // Add a node to the distributed store
+	store := newDistributedStore()
+	store.addNode() // Add a node to the distributed store
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -94,7 +109,7 @@ func main() {
 
 		command = strings.TrimSpace(command)
 		parts := strings.SplitN(command, " ", 3)
-		if len(parts) < 2 {
+		if len(parts) < 2 && parts[0] != "replicate" {
 			fmt.Println("Invalid command. Usage: <put|get|delete> <key> [<value>]")
 			continue
 		}
@@ -105,14 +120,14 @@ func main() {
 				fmt.Println("Invalid command. Usage: put <key> <value>")
 				continue
 			}
-			store.Put(parts[1], parts[2])
+			store.put(parts[1], parts[2])
 			fmt.Println("Key-value pair stored.")
 		case "get":
 			if len(parts) != 2 {
 				fmt.Println("Invalid command. Usage: get <key>")
 				continue
 			}
-			value, ok := store.Get(parts[1])
+			value, ok := store.get(parts[1])
 			if ok {
 				fmt.Printf("Value: %s\n", value)
 			} else {
@@ -123,8 +138,11 @@ func main() {
 				fmt.Println("Invalid command. Usage: delete <key>")
 				continue
 			}
-			store.Delete(parts[1])
+			store.delete(parts[1])
 			fmt.Println("Key-value pair deleted.")
+		case "replicate":
+			store.replicate()
+			fmt.Println("last node replicated.")
 		default:
 			fmt.Println("Invalid command. Usage: <put|get|delete> <key> [<value>]")
 		}

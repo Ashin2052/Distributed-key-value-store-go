@@ -20,7 +20,7 @@ The CLI supports the following commands:
 #### ```put <key> <value>```: Stores the given key-value pair in the distributed key-value store.
 #### ```get <key>```: Retrieves the value associated with the given key from the distributed key-value store.
 #### ```delete <key>```: Deletes the key-value pair associated with the given key from the distributed key-value store.
-To start the CLI, run the following command:
+#### ```replicate ```: Replicate function replicates data across nodes by iterating over the existing nodes (excluding the last one) and copying the key-value pairs.To start the CLI, run the following command:
 
 ```go run main.go```
 After starting the CLI, you can enter commands:
@@ -37,6 +37,10 @@ Key-value pair deleted.
 
 > get name
 Key not found.
+
+> replicate
+last node replicated.
+
 ```
 ## Implementation Details
 
