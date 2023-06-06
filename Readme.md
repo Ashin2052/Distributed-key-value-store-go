@@ -51,6 +51,6 @@ The Node type represents a single node in the distributed key-value store. It co
 
 #### DistributedStore
 The DistributedStore type represents the distributed key-value store. It is responsible for managing multiple nodes and distributing key-value pairs among them. The AddNode method adds a new node to the distributed store. The GetNodeForKey method determines the node responsible for a given key based on a simple hashing algorithm. The Put, Get, and Delete methods interact with the appropriate node to perform the respective operations.
-
+`` Note: Node Distribution is immplmented using single logic.If key = name and total nodes are 3 then len(4) % len(3) then nodeIndex to be inserted on  is 1``
 #### Command-Line Interface
 The program's main function sets up the CLI. It creates a DistributedStore instance and adds a node to it. It then reads commands from the standard input, parses them, and performs the corresponding operations using the DistributedStore methods. The CLI supports the put, get, and delete commands as described earlier.
