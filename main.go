@@ -66,24 +66,36 @@ func (d *DistributedStore) getNodeForKey(key string) *Node {
 
 // put stores a key-value pair in the distributed key-value store
 func (d *DistributedStore) put(key, value string) {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
 	node := d.getNodeForKey(key)
 	node.setValue(key, value)
 }
 
 // get retrieves the value for a given key from the distributed key-value store
 func (d *DistributedStore) get(key string) (string, bool) {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
 	node := d.getNodeForKey(key)
 	return node.getValue(key)
 }
 
 // delete removes a key-value pair from the distributed key-value store
 func (d *DistributedStore) delete(key string) {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
 	node := d.getNodeForKey(key)
 	node.deleteValue(key)
 }
 
 // replicate the last node data to every node
 func (d *DistributedStore) replicate() {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
 	if len(d.nodes) < 2 {
 		return
 	}
